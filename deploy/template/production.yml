@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'A serverless application to notify whether it succeeded or not.'
+Resources:
+  CodePipelineNotify:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: '../../main.zip'
+      Handler: 'main'
+      Runtime: 'go1.x'
+      FunctionName: 'codepipeline-notify'
+      Role: 'arn:aws:iam::123456789012:role/LambdaBasicExecution'
+      MemorySize: 128
+      Timeout: 8
+      Events:
+        CodeCommitStateChanged:
+          Type: 'CloudWatchEvent'
+          Properties:
+            Pattern:
+              source:
+                - 'aws.codepipeline'
+              detail-type:
+                - 'CodePipeline Pipeline Execution State Change'
+      Environment:
+        Variables:
+          SLACK_WEBHOOK_URL: 'Put a Slack webhook URL'
+          SLACK_CHANNEL: '#serverless'
+          SLACK_EMOJI_ICON: ':samtaro1:'

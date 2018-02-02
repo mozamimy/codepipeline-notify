@@ -1,0 +1,22 @@
+version: 0.2
+env:
+  variables:
+    PACKAGE: 'ghe.ckpd.co/serverless/codepipeline-notify'
+phases:
+  install:
+    commands:
+      - 'mkdir -p "/go/src/$(dirname ${PACKAGE})"'
+      - 'ln -s "${CODEBUILD_SRC_DIR}" "/go/src/${PACKAGE}"'
+      - 'env'
+  pre_build:
+    commands:
+      - 'cd "/go/src/${PACKAGE}"'
+      - 'go get ./...'
+  build:
+    commands:
+      - 'go build -o main'
+      - 'zip main.zip main'
+      - 'aws cloudformation package --template-file deploy/template/staging.yml --s3-bucket sam-artifact-dev.ap-northeast-1 --output-template-file staging-template.package.yml'
+artifacts:
+  files:
+    - 'staging-template.package.yml'
